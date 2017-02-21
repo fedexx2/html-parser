@@ -12,15 +12,17 @@ class Parser
     private $reader;
     private $html;
     private $uid;
-    private $debugPath;
     private $trimTxt = false;
 
-    public function __construct($html, Uid $uid, $debugPath = false)
+    private $debug;
+
+
+    public function __construct($html, Uid $uid, $debug = false)
     {
         $this->html = $html;
         $this->uid = $uid;
         $this->reader = new Reader($html);
-        $this->debugPath = $debugPath;
+        $this->debug = $debug;
     }
 
     public function trimText($t)
@@ -31,29 +33,19 @@ class Parser
 
     public function parse()
     {
-        $stop1 = microtime(true);
-
         $rawTokens = $this->splitTokens();
-        if ($this->debugPath)
+        if ($this->debug)
             $this->debugSplittedTokens($rawTokens);
-        $stop2 = microtime(true);
 
         $tokens = $this->parseTokens($rawTokens);
-        if ($this->debugPath)
+        if ($this->debug)
             $this->debugTokens($tokens);
-        $stop3 = microtime(true);
 
         $rootNode = $this->buildTree($tokens);
-        if ($this->debugPath)
+        if ($this->debug)
             $this->debugTree($rootNode);
-        $stop4 = microtime(true);
-
-        echo "RAW:  " . ($stop2-$stop1) *1000 . "<br>";
-        echo "TOK:  " . ($stop3-$stop2) *1000 . "<br>";
-        echo "TREE: " . ($stop4-$stop3) *1000 . "<br>";
 
         return $rootNode;
-
     }
 
     private function splitTokens()
@@ -243,17 +235,17 @@ class Parser
 
     private function debugSplittedTokens($rawTokens)
     {
-        file_put_contents($this-> debugPath . '1_rawTokens.txt', print_r($rawTokens, true));
+        file_put_contents('./1_rawTokens.txt', print_r($rawTokens, true));
     }
     private function debugTokens($Tokens)
     {
-        file_put_contents($this-> debugPath . '2_Tokens.txt', print_r($Tokens, true));
+        file_put_contents('./2_Tokens.txt', print_r($Tokens, true));
     }
     public function debugTree($root)
     {
         $data = [];
         $root->printDebug(0, $data);
-        file_put_contents($this-> debugPath . '3_Tree.txt', implode("\r\n",$data));
+        file_put_contents('./3_Tree.txt', implode("\r\n",$data));
     }
 
 }
