@@ -65,15 +65,22 @@ class NodeCollection implements \Iterator
 
     public function replaceNodeWith(Node $old, $new)
     {
+        $parent = $old->getParent();
+
         /** @var Node $n */
         foreach($this->nodes as $i => $n) {
             if ($n->getUid() == $old->getUid()) {
 
                 if(is_a($new, self::class)) {
                     array_splice($this->nodes, $i, 1, $new->nodes);
+                    foreach($new->nodes as $nn) {
+                        $nn->setParent($parent);
+                    }
                 }
                 else {
+                    $new->setParent($parent);
                     $this->nodes[$i] = $new;
+
                 }
             }
         }

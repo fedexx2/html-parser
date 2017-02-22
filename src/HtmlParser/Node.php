@@ -189,6 +189,11 @@ class Node
         return $this->parent;
     }
 
+    public function setParent($n)
+    {
+        $this->parent = $n;
+    }
+
 
     /* -------------------- ATTRIBUTES PARSING --------------------- */
 
