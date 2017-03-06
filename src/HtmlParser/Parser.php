@@ -2,27 +2,23 @@
 
 namespace HtmlParser;
 
-use HtmlParser\Reader;
-use HtmlParser\Token;
-use HtmlParser\TokenType;
+use HtmlParser\Elements\CommentNode;
+use HtmlParser\Elements\RootNode;
+use HtmlParser\Elements\TagNode;
+use HtmlParser\Elements\TextNode;
 use HtmlParser\CloseType;
 
 class Parser
 {
     private $reader;
     private $html;
-    private $uid;
     private $trimTxt = false;
 
-    private $debug;
 
-
-    public function __construct($html, Uid $uid, $debug = false)
+    public function __construct($html)
     {
         $this->html = $html;
-        $this->uid = $uid;
         $this->reader = new Reader($html);
-        $this->debug = $debug;
     }
 
     public function trimText($t)
@@ -34,17 +30,8 @@ class Parser
     public function parse()
     {
         $rawTokens = $this->splitTokens();
-        if ($this->debug)
-            $this->debugSplittedTokens($rawTokens);
-
         $tokens = $this->parseTokens($rawTokens);
-        if ($this->debug)
-            $this->debugTokens($tokens);
-
         $rootNode = $this->buildTree($tokens);
-        if ($this->debug)
-            $this->debugTree($rootNode);
-
         return $rootNode;
     }
 
@@ -53,15 +40,16 @@ class Parser
         $literalTags = ['script', 'style'];
         $rawTokens = [];
 
-        while (!$this->reader->isEnd())
-        {
+        while (!$this->reader->isEnd()) {
             $data = $this->reader->readUntil("<", Reader::EXCL);
 
-            if($this->trimTxt)
+            if ($this->trimTxt) {
                 $data = trim($data);
+            }
 
-            if($data)
+            if ($data) {
                 $rawTokens[] = $data;
+            }
 
             if ($this->reader->doesMatch("<!--"))        //Comment
             {
@@ -70,10 +58,10 @@ class Parser
                 continue;
             }
 
-            foreach($literalTags as $tag)
-            {
-                if (!$this->reader->doesMatch("<{$tag}"))
+            foreach ($literalTags as $tag) {
+                if (!$this->reader->doesMatch("<{$tag}")) {
                     continue;
+                }
 
                 $data = $this->reader->readUntil(">", Reader::INCL);             //open tag
                 $rawTokens[] = $data;
@@ -95,35 +83,38 @@ class Parser
         $count = count($rawTokens);
         $tokens = [];
 
-        for ($i=0; $i<$count; $i++)
-        {
+        for ($i = 0; $i < $count; $i++) {
             $t = $rawTokens[$i];
 
             if (preg_match('/^<!--.*-->$/is', $t))                      //Comment
             {
                 $tokens[] = Token::new_Comment($t);
-            }
-            else if (preg_match('/^<!/', $t))                           //Doctype
-            {
-                $tokens[] = Token::new_Text($t);
-            }
-            else if (preg_match('/^<.*>$/is', $t))   //Tag
-            {
-                if($t[1] == "/")
-                    $type = TokenType::TAG_CLOSE;
-                else if ($t[strlen($t)-2] == "/")
-                    $type = TokenType::TAG_SELF;
-                else
-                    $type = TokenType::TAG_OPEN;
+            } else {
+                if (preg_match('/^<!/', $t))                           //Doctype
+                {
+                    $tokens[] = Token::new_Text($t);
+                } else {
+                    if (preg_match('/^<.*>$/is', $t))   //Tag
+                    {
+                        if ($t[1] == "/") {
+                            $type = TokenType::TAG_CLOSE;
+                        } else {
+                            if ($t[strlen($t) - 2] == "/") {
+                                $type = TokenType::TAG_SELF;
+                            } else {
+                                $type = TokenType::TAG_OPEN;
+                            }
+                        }
 
-                preg_match('#</?(.*?)(?:\s(.*?))?/?>#is', $t, $match);
-                $tag = $match[1];
-                $rawAtt = isset($match[2]) ? $match[2] : "";
-                $tokens[] = Token::new_Tag($type, $tag, $rawAtt);
-            }
-            else        //Text
-            {
-                $tokens[] = Token::new_Text($t);
+                        preg_match('#</?(.*?)(?:\s(.*?))?/?>#is', $t, $match);
+                        $tag = $match[1];
+                        $rawAtt = isset($match[2]) ? $match[2] : "";
+                        $tokens[] = Token::new_Tag($type, $tag, $rawAtt);
+                    } else        //Text
+                    {
+                        $tokens[] = Token::new_Text($t);
+                    }
+                }
             }
         }
         return $tokens;
@@ -132,65 +123,48 @@ class Parser
     private function buildTree($tokens)
     {
         /** @var Node $current */
-        $root = Node::new_Root();
+        $root = new RootNode();
         $current = $root;
 
-        foreach ($tokens as $t)
-        {
-            switch ($t['type'])
-            {
-                case TokenType::TEXT:
-                {
-                    $uid = $this->uid->getNewId();
-                    $current->addChild(Node::new_Text($t['text'], $uid));
+        foreach ($tokens as $t) {
+            switch ($t['type']) {
+                case TokenType::TEXT: {
+                    $current->addChild(new TextNode($t['text']));
                     break;
                 }
-                case TokenType::COMMENT:
-                {
-                    $uid = $this->uid->getNewId();
-                    $current->addChild(Node::new_Comment($t['text'], $uid));
+                case TokenType::COMMENT: {
+                    $current->addChild(new CommentNode($t['text']));
                     break;
                 }
-                case TokenType::TAG_SELF:
-                {
-                    $uid = $this->uid->getNewId();
-                    $current->addChild(Node::new_TagSelf($t['tag'], $t['rawAtt'], $uid));
+                case TokenType::TAG_SELF: {
+                    $current->addChild(new TagNode($t['tag'], $t['rawAtt'], ClosingType::SELF));
                     break;
                 }
-                case TokenType::TAG_OPEN:
-                {
-                    $uid = $this->uid->getNewId();
-                    $n = Node::new_TagOpen($t['tag'], $t['rawAtt'], $uid);
+                case TokenType::TAG_OPEN: {
+                    $n = new TagNode($t['tag'], $t['rawAtt'], ClosingType::NO);
                     $current->addChild($n);
                     $current = $n;
                     break;
                 }
-                case TokenType::TAG_CLOSE:
-                {
+                case TokenType::TAG_CLOSE: {
                     $tag = $t['tag'];
 
                     $opening = $current;
-                    if($opening->getTag() != $tag) {
-                        $opening = $current->findParent(function ($n) use ($tag) {
-                            return $n->getTag() == $tag || $n->getType() == NodeType::ROOT;
-                        });
+                    if ($opening->getTag() != $tag) {
+                        $opening = $current->parent($tag);
+                    }
+                    if (!$opening) {
+                        $opening = $root;
                     }
 
                     $openChildren = $this->getOpenChildren($opening);
 
-                    $opening->clearChildren();
                     $opening->addChildren($openChildren);
+                    $opening->setClosing(ClosingType::YES);
+                    $current = $opening->parent();
 
-
-                    if ($opening->getType() == NodeType::ROOT)
-                    {
+                    if ($opening instanceof RootNode) {
                         $this->closeNodes($opening);
-                        $current = $opening;
-                    }
-                    else
-                    {
-                        $opening->setClosing(CloseType::YES);
-                        $current = $opening->getParent();
                     }
                     break;
                 }
@@ -200,52 +174,29 @@ class Parser
         return $root;
     }
 
-    private function getOpenChildren(Node $node)
+    private function getOpenChildren(TagNode $node)
     {
-        $result = new NodeCollection();
+        $result = [];
 
-        /** @var Node $n */
-        foreach ($node->getChildren() as $n)
-        {
-            $result->add($n);
+        $children = $node->detachChildren();
+        foreach ($children as $c) {
+            $result[] = $c;
 
-            if ($n->getType() == NodeType::TAG && $n->getClosing() == CloseType::NO)
-            {
-                $result->addRange($this->getOpenChildren($n));
-                $n->clearChildren();
+            if ($c instanceof TagNode && $c->getClosing() == ClosingType::NO) {
+                $result = array_merge($result, $this->getOpenChildren($c));
             }
         }
         return $result;
     }
 
-    private function closeNodes(Node $n)
+    private function closeNodes(TagNode $node)
     {
         /** @var Node $c */
-        foreach ($n->getChildren() as $c)
-        {
-            if ($c->getType() == NodeType::TAG && $c->getClosing() == CloseType::NO)
-            {
-                $c->setClosing(CloseType::YES);
+        foreach ($node as $c) {
+            if ($c instanceof TagNode && $c->getClosing() == ClosingType::NO) {
+                $c->setClosing(ClosingType::YES);
                 $this->closeNodes($c);
             }
         }
     }
-
-    //------------------ DEBUG --------------------
-
-    private function debugSplittedTokens($rawTokens)
-    {
-        file_put_contents('./1_rawTokens.txt', print_r($rawTokens, true));
-    }
-    private function debugTokens($Tokens)
-    {
-        file_put_contents('./2_Tokens.txt', print_r($Tokens, true));
-    }
-    public function debugTree($root)
-    {
-        $data = [];
-        $root->printDebug(0, $data);
-        file_put_contents('./3_Tree.txt', implode("\r\n",$data));
-    }
-
 }

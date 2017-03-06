@@ -22,10 +22,10 @@ class Reader
     {
         $end = strpos($this->html, $key, $this->position);
 
-        $end = ($end === false) ? $this->length       :
-                (($including)     ? $end + strlen($key) : $end);
+        $end = ($end === false) ? $this->length :
+            (($including) ? $end + strlen($key) : $end);
 
-        $ret =  substr($this->html, $this->position, ($end-$this->position));
+        $ret = substr($this->html, $this->position, ($end - $this->position));
         $this->position = $end;
         return $ret;
     }
@@ -33,12 +33,15 @@ class Reader
     public function doesMatch($key)
     {
         $l = strlen($key);
-        if($this->length - $this->position < $l)
+        if ($this->length - $this->position < $l) {
             return false;
+        }
 
-        for($i = 0; $i < $l; $i++)
-            if ($this->html[$this->position + $i] != $key[$i])
+        for ($i = 0; $i < $l; $i++) {
+            if ($this->html[$this->position + $i] != $key[$i]) {
                 return false;
+            }
+        }
 
         return true;
     }
