@@ -10,7 +10,7 @@ abstract class AbstractNode
     protected $uid;
     protected $type;
 
-    /** @var  AbstractNode */
+    /** @var  CollectionNode */
     protected $parent;
 
 
