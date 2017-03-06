@@ -128,25 +128,25 @@ class Parser
 
         foreach ($tokens as $t) {
             switch ($t['type']) {
-                case TokenType::TEXT: {
+                case TokenType::TEXT:
                     $current->addChild(new TextNode($t['text']));
                     break;
-                }
-                case TokenType::COMMENT: {
+
+                case TokenType::COMMENT:
                     $current->addChild(new CommentNode($t['text']));
                     break;
-                }
-                case TokenType::TAG_SELF: {
+
+                case TokenType::TAG_SELF:
                     $current->addChild(new TagNode($t['tag'], $t['rawAtt'], ClosingType::SELF));
                     break;
-                }
-                case TokenType::TAG_OPEN: {
+
+                case TokenType::TAG_OPEN:
                     $n = new TagNode($t['tag'], $t['rawAtt'], ClosingType::NO);
                     $current->addChild($n);
                     $current = $n;
                     break;
-                }
-                case TokenType::TAG_CLOSE: {
+
+                case TokenType::TAG_CLOSE:
                     $tag = $t['tag'];
 
                     $opening = $current;
@@ -167,7 +167,7 @@ class Parser
                         $this->closeNodes($opening);
                     }
                     break;
-                }
+
             }
         }
         $this->closeNodes($root);

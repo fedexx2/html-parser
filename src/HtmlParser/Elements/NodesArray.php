@@ -88,21 +88,18 @@ class NodesArray implements \IteratorAggregate, \Countable
             }
         }
 
-
         if ($selector instanceof Selector && $selector->hasNext()) {
             $selector = $selector->getNext();
             $ec = $result->explodeChildren();
             return $ec->find($selector, $selector->getDepht());
         }
-
-
         return $result;
     }
 
     public function explodeChildren()
     {
         $children = new NodesArray();
-        foreach($this->nodes as $n){
+        foreach ($this->nodes as $n) {
             $children->addRange($n);
         }
         return $children;

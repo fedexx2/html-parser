@@ -8,7 +8,7 @@ use HtmlParser\TokenType;
 class Token
 {
 
-    static public function new_Text($text)
+    public static function new_Text($text)
     {
         return [
             'type' => TokenType::TEXT,
@@ -18,7 +18,7 @@ class Token
         ];
     }
 
-    static public function new_Comment($text)
+    public static function new_Comment($text)
     {
         return [
             'type' => TokenType::COMMENT,
@@ -28,7 +28,7 @@ class Token
         ];
     }
 
-    static public function new_Tag($type, $tag, $rawAtt = '')
+    public static function new_Tag($type, $tag, $rawAtt = '')
     {
         return [
             'type' => $type,

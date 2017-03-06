@@ -137,11 +137,11 @@ class TagNode extends CollectionNode
     private function att2str()
     {
         $atts = [];
-        if ($this->ids) {
+        if (!empty($this->ids)) {
             $atts[] = "id=\"" . implode(' ', array_keys($this->ids)) . "\"";
         }
 
-        if ($this->classes) {
+        if (!empty($this->classes)) {
             $atts[] = "class=\"" . implode(' ', array_keys($this->classes)) . "\"";
         }
 
@@ -168,15 +168,12 @@ class TagNode extends CollectionNode
 
             case ClosingType::SELF:
                 return "<{$this->tag}{$atts} />";
-                break;
 
             case ClosingType::NO:
                 return "<{$this->tag}{$atts}>" . parent::getHtml();
-                break;
 
             case ClosingType::YES:
                 return "<{$this->tag}{$atts}>" . parent::getHtml() . "</{$this->tag}>";
-                break;
         }
     }
 

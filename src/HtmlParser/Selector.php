@@ -57,6 +57,10 @@ class Selector
 
             preg_match_all('/[\.#@]?([^\.#@]+)/', $i, $pieces, PREG_SET_ORDER);
 
+            if (!$pieces) {
+                throw new \Exception('Error parsing selector code');
+            }
+
             foreach ($pieces as $p) {
                 if ($p[0][0] == '.') {
                     $classes[] = $p[1];
@@ -92,10 +96,10 @@ class Selector
         if ($this->tag && $this->tag != $node->getTag()) {
             return false;
         }
-        if ($this->ids && !$node->hasId($this->ids)) {
+        if (!empty($this->ids) && !$node->hasId($this->ids)) {
             return false;
         }
-        if ($this->classes && !$node->hasClass($this->classes)) {
+        if (!empty($this->classes) && !$node->hasClass($this->classes)) {
             return false;
         }
         return true;
@@ -111,7 +115,7 @@ class Selector
         return $this->next;
     }
 
-    public function getDepht()
+    public function getDepth()
     {
         return $this->depth;
     }

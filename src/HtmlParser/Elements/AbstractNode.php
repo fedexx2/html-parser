@@ -43,8 +43,6 @@ abstract class AbstractNode
             return null;
         }
 
-        $result = null;
-
         if ($func($this->parent)) {
 
             if ($selector instanceof Selector && $selector->hasNext()) {
@@ -70,10 +68,10 @@ abstract class AbstractNode
             $new = [$new];
         } elseif ($new instanceof NodesArray) {
             $new = $new->getArray();
-        } elseif (is_array($new)) {
-        } else {
+        } elseif (!is_array($new)) {
             throw new \Exception("Invalid new nodes");
         }
+
         $parent = $this->parent;
         $done = false;
         foreach ($parent->nodes as $i => $n) {
@@ -97,6 +95,12 @@ abstract class AbstractNode
         $newTag->addChild($this);
         return $newTag;
     }
+
+    public function find($selector, $depth = -1)
+    {
+        return new NodesArray();
+    }
+
 
     abstract public function getInfo(Array $info = []);
 
