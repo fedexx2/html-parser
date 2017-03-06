@@ -91,7 +91,7 @@ class NodesArray implements \IteratorAggregate, \Countable
         if ($selector instanceof Selector && $selector->hasNext()) {
             $selector = $selector->getNext();
             $ec = $result->explodeChildren();
-            return $ec->find($selector, $selector->getDepht());
+            return $ec->find($selector, $selector->getDepth());
         }
         return $result;
     }

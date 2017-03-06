@@ -64,28 +64,7 @@ abstract class AbstractNode
 
     public function replaceWith($new)
     {
-        if ($new instanceof AbstractNode) {
-            $new = [$new];
-        } elseif ($new instanceof NodesArray) {
-            $new = $new->getArray();
-        } elseif (!is_array($new)) {
-            throw new \Exception("Invalid new nodes");
-        }
-
-        $parent = $this->parent;
-        $done = false;
-        foreach ($parent->nodes as $i => $n) {
-            if ($n == $this) {
-                array_splice($parent->nodes, $i, 1, $new);
-                $done = true;
-            }
-        }
-        if ($done) {
-            foreach ($new as $n) {
-                $n->parent = $parent;
-            }
-            $this->parent = null;
-        }
+        $this->parent->replaceChild($this, $new);
     }
 
     public function wrap($tag, $attributes = '')

@@ -92,9 +92,32 @@ class CollectionNode extends AbstractNode implements \IteratorAggregate, \Counta
         }
     }
 
+    public function replaceChild($child, $new)
+    {
+        if ($new instanceof AbstractNode) {
+            $new = [$new];
+        } elseif ($new instanceof NodesArray) {
+            $new = $new->getArray();
+        } elseif (!is_array($new)) {
+            throw new \Exception("Invalid new nodes");
+        }
+
+        foreach($this->nodes as $i => $c) {
+            if($child == $c) {
+                array_splice($this->nodes, $i, 1, $new);
+                $c->parent = null;
+
+                foreach($new as $n) {
+                    $n->parent = $this;
+                }
+                break;
+            }
+        }
+    }
+
     public function replaceWithChildren()
     {
-        $this->replaceWith($this->nodes);
+        $this->parent->replaceChild($this, $this->nodes);
     }
 
     public function getInfo(Array $info = [])
