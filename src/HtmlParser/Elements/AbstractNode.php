@@ -26,7 +26,7 @@ abstract class AbstractNode
 
     public function parent($selector = null, $depth = -1)
     {
-        if(is_null($selector)) {
+        if (is_null($selector)) {
             return $this->parent;
         }
 
