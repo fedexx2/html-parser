@@ -51,7 +51,6 @@ abstract class AbstractNode
     public function detach()
     {
         $this->parent->removeChild($this);
-        $this->parent = null;
         return $this;
     }
 
@@ -71,6 +70,16 @@ abstract class AbstractNode
     public function find($selector, $depth = -1)
     {
         return new NodesArray();
+    }
+
+    public function after($new)
+    {
+        $this->parent->afterChild($this, $new);
+    }
+
+    public function before($new)
+    {
+        $this->parent->beforeChild($this, $new);
     }
 
 

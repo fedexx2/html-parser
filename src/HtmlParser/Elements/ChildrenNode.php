@@ -81,34 +81,60 @@ class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countabl
         return $ret;
     }
 
-    public function removeChild(AbstractNode $node)
+    public function removeChild(AbstractNode $child)
     {
-        foreach ($this->nodes as $i => $n) {
-            if ($n == $node) {
-                array_splice($this->nodes, $i, 1);
-            }
+        if(($i = array_search($child, $this->nodes)) !== false) {
+            $this->nodes[$i]->parent = null;
+            array_splice($this->nodes, $i, 1);
         }
+    }
+
+    private function toArray($new)
+    {
+        if ($new instanceof AbstractNode) {
+            return [$new];
+        } elseif ($new instanceof NodesArray) {
+            return $new->getArray();
+        } elseif (is_array($new)) {
+            return $new;
+        }
+        throw new \Exception("Invalid new nodes");
     }
 
     public function replaceChild(AbstractNode $child, $new)
     {
-        if ($new instanceof AbstractNode) {
-            $new = [$new];
-        } elseif ($new instanceof NodesArray) {
-            $new = $new->getArray();
-        } elseif (!is_array($new)) {
-            throw new \Exception("Invalid new nodes");
+        $new = $this->toArray($new);
+
+        if(($i = array_search($child, $this->nodes)) !== false)
+        {
+            $this->nodes[$i]->parent = null;
+            array_splice($this->nodes, $i, 1, $new);
+            foreach($new as $n) {
+                $n->parent = $this;
+            }
         }
+    }
 
-        foreach($this->nodes as $i => $c) {
-            if($child == $c) {
-                array_splice($this->nodes, $i, 1, $new);
-                $c->parent = null;
+    public function afterChild(AbstractNode $child, $new)
+    {
+        $new = $this->toArray($new);
+        if(($i = array_search($child, $this->nodes)) !== false)
+        {
+            array_splice($this->nodes, $i+1, 0, $new);
+            foreach($new as $n) {
+                $n->parent = $this;
+            }
+        }
+    }
 
-                foreach($new as $n) {
-                    $n->parent = $this;
-                }
-                break;
+    public function beforeChild(AbstractNode $child, $new)
+    {
+        $new = $this->toArray($new);
+        if(($i = array_search($child, $this->nodes)) !== false)
+        {
+            array_splice($this->nodes, $i, 0, $new);
+            foreach($new as $n) {
+                $n->parent = $this;
             }
         }
     }
