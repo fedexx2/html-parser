@@ -94,7 +94,7 @@ class TagNode extends CollectionNode
     public function hasClass($class)
     {
         if (is_array($class)) {
-            return empty(array_diff($class, $this->classes));
+            return empty(array_diff($class, array_keys($this->classes)));
         }
         return isset($this->classes[$class]);
     }
@@ -114,7 +114,7 @@ class TagNode extends CollectionNode
     public function hasId($id)
     {
         if (is_array($id)) {
-            return empty(array_diff($id, $this->ids));
+            return empty(array_diff($id, array_keys($this->ids)));
         }
         return isset($this->ids[$id]);
     }
