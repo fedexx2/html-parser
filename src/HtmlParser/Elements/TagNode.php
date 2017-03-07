@@ -12,9 +12,9 @@ class TagNode extends ChildrenNode
 
     protected $attributes = [];
 
-    protected $ids = [];
+    protected $id = [];
 
-    protected $classes = [];
+    protected $class = [];
 
     public function __construct($tag, $attributes = null, $closing = ClosingType::YES)
     {
@@ -95,40 +95,40 @@ class TagNode extends ChildrenNode
     public function hasClass($class)
     {
         if (is_array($class)) {
-            return empty(array_diff($class, array_keys($this->classes)));
+            return empty(array_diff($class, array_keys($this->class)));
         }
-        return isset($this->classes[$class]);
+        return isset($this->class[$class]);
     }
 
     public function addClass($class)
     {
-        $this->classes[$class] = true;
+        $this->class[$class] = true;
         return this;
     }
 
     public function removeClass($class)
     {
-        unset ($this->classes[$class]);
+        unset ($this->class[$class]);
         return this;
     }
 
     public function hasId($id)
     {
         if (is_array($id)) {
-            return empty(array_diff($id, array_keys($this->ids)));
+            return empty(array_diff($id, array_keys($this->id)));
         }
-        return isset($this->ids[$id]);
+        return isset($this->id[$id]);
     }
 
     public function addId($id)
     {
-        $this->ids[$id] = true;
+        $this->id[$id] = true;
         return this;
     }
 
     public function removeId($id)
     {
-        unset ($this->ids[$id]);
+        unset ($this->id[$id]);
         return this;
     }
 
