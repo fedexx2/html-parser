@@ -63,16 +63,7 @@ class NodesArray implements \IteratorAggregate, \Countable
 
     public function find($selector, $depth = -1)
     {
-        if (is_callable($selector)) {
-            $func = $selector;
-        } elseif (is_string($selector)) {
-            $selector = Selector::build($selector);
-            $func = [$selector, 'match'];
-        } elseif ($selector instanceof Selector) {
-            $func = [$selector, 'match'];
-        } else {
-            throw new \Exception("Invalid selector");
-        }
+        list($selector, $func) = Selector::create($selector);
 
         $result = new NodesArray();
         $depth--;

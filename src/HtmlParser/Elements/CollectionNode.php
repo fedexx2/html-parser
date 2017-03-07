@@ -92,7 +92,7 @@ class CollectionNode extends AbstractNode implements \IteratorAggregate, \Counta
         }
     }
 
-    public function replaceChild($child, $new)
+    public function replaceChild(AbstractNode $child, $new)
     {
         if ($new instanceof AbstractNode) {
             $new = [$new];
@@ -127,6 +127,4 @@ class CollectionNode extends AbstractNode implements \IteratorAggregate, \Counta
         }
         return $info;
     }
-
-
 }

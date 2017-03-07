@@ -26,18 +26,7 @@ abstract class AbstractNode
 
     public function parent($selector = null, $depth = -1)
     {
-        if (empty($selector)) {
-            return $this->parent;
-        } elseif (is_callable($selector)) {
-            $func = $selector;
-        } elseif (is_string($selector)) {
-            $selector = Selector::build($selector);
-            $func = [$selector, 'match'];
-        } elseif ($selector instanceof Selector) {
-            $func = [$selector, 'match'];
-        } else {
-            throw new \Exception("Invalid selector");
-        }
+        list($selector, $func) = Selector::create($selector);
 
         if ($this->parent == null || $this->parent instanceof RootNode || $depth == 0) {
             return null;

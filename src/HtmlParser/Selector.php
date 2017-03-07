@@ -34,7 +34,7 @@ class Selector
         $this->next = $next;
     }
 
-    public static function build($code)
+    public static function fromCss($code)
     {
         $code = strtolower($code);
         $code = preg_replace('/\s*>\s/', '>', $code);
@@ -74,6 +74,22 @@ class Selector
             $selector = new Selector($tag, $classes, $ids, $depth, $selector);
         }
         return $selector;
+    }
+
+    public static function create($selector)
+    {
+        if(is_callable($selector)) {
+            return [$selector, $selector];
+        }
+
+        if (is_string($selector)) {
+            $selector = self::fromCss($selector);
+        }
+
+        if($selector instanceof Selector) {
+            return [$selector, [$selector, 'match']];
+        }
+        throw new \Exception('Invalid Selector');
     }
 
     public function match(AbstractNode $node)
