@@ -10,7 +10,7 @@ abstract class AbstractNode
     protected $uid;
     protected $type;
 
-    /** @var  CollectionNode */
+    /** @var  ChildrenNode */
     protected $parent;
 
 
@@ -26,6 +26,10 @@ abstract class AbstractNode
 
     public function parent($selector = null, $depth = -1)
     {
+        if(is_null($selector)) {
+            return $this->parent;
+        }
+
         list($selector, $func) = Selector::create($selector);
 
         if ($this->parent == null || $this->parent instanceof RootNode || $depth == 0) {

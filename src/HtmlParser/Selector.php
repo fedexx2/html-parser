@@ -78,7 +78,7 @@ class Selector
 
     public static function create($selector)
     {
-        if (is_callable($selector)) {
+        if(is_callable($selector)) {
             return [$selector, $selector];
         }
 
@@ -86,7 +86,7 @@ class Selector
             $selector = self::fromCss($selector);
         }
 
-        if ($selector instanceof Selector) {
+        if($selector instanceof Selector) {
             return [$selector, [$selector, 'match']];
         }
         throw new \Exception('Invalid Selector');
@@ -97,24 +97,27 @@ class Selector
         if ($this->tag == '**') {
             return true;
         }
-
-        if (
-            ($this->tag == '*' && $node instanceof TagNode) ||
-            ($this->tag == '$' && $node instanceof TextNode) ||
-            ($this->tag == '%' && $node instanceof CommentNode)
-        ) {
+        if ($this->tag == '*' && $node instanceof TagNode) {
             return true;
         }
-
-        if (
-            (!$node instanceof TagNode) ||
-            ($this->tag && $this->tag != $node->getTag()) ||
-            (!empty($this->ids) && !$node->hasId($this->ids)) ||
-            (!empty($this->classes) && !$node->hasClass($this->classes))
-        ) {
+        if ($this->tag == '$' && $node instanceof TextNode) {
+            return true;
+        }
+        if ($this->tag == '%' && $node instanceof CommentNode) {
+            return true;
+        }
+        if (!$node instanceof TagNode) {
             return false;
         }
-
+        if ($this->tag && $this->tag != $node->getTag()) {
+            return false;
+        }
+        if (!empty($this->ids) && !$node->hasId($this->ids)) {
+            return false;
+        }
+        if (!empty($this->classes) && !$node->hasClass($this->classes)) {
+            return false;
+        }
         return true;
     }
 

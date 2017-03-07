@@ -12,7 +12,28 @@ class Parser
 {
     private $reader;
     private $html;
-    private $trimTxt = false;
+
+    private $trimText = false;
+
+    private $literalTags = ['script', 'style'];
+    private $voidTags = [
+        'area',
+        'base',
+        'br',
+        'col',
+        'command',
+        'embed',
+        'hr',
+        'img',
+        'input',
+        'keygen',
+        'link',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr'
+    ];
 
 
     public function __construct($html)
@@ -21,62 +42,68 @@ class Parser
         $this->reader = new Reader($html);
     }
 
-    public function trimText($t)
+    public function setTrimText($t)
     {
-        $this->trimTxt = $t;
+        $this->trimText = $t;
     }
 
 
-    public function parse()
+    public function parse(&$times = [])
     {
+        $t0 = microtime(true);
         $rawTokens = $this->splitTokens();
+        $t1 = microtime(true);
         $tokens = $this->parseTokens($rawTokens);
+        $t2 = microtime(true);
         $rootNode = $this->buildTree($tokens);
+        $t3 = microtime(true);
+
+        $times = [
+            ($t1 - $t0) * 1000,
+            ($t2 - $t1) * 1000,
+            ($t3 - $t2) * 1000
+        ];
+
         return $rootNode;
     }
 
     private function splitTokens()
     {
-        $literalTags = ['script', 'style'];
         $rawTokens = [];
 
         while (!$this->reader->isEnd()) {
-            $data = $this->reader->readUntil("<", Reader::EXCL);
-
-            if ($this->trimTxt) {
-                $data = trim($data);
-            }
-
-            if ($data) {
-                $rawTokens[] = $data;
-            }
 
             if ($this->reader->doesMatch("<!--"))        //Comment
             {
-                $data = $this->reader->readUntil("-->", Reader::INCL);
-                $rawTokens[] = $data;
+                $rawTokens[] = $this->reader->readUntilIncluding("-->");
                 continue;
             }
 
-            foreach ($literalTags as $tag) {
-                if (!$this->reader->doesMatch("<{$tag}")) {
-                    continue;
+            foreach ($this->literalTags as $tag) {
+                if ($this->reader->doesMatch("<{$tag}")) {
+                    $rawTokens[] = $this->reader->readUntilIncluding(">");             //open tag
+                    $rawTokens[] = $this->reader->readUntilExcluding("</{$tag}>");     //content
+                    $rawTokens[] = $this->reader->readUntilIncluding("</{$tag}>");     //closing tag
+                    continue 2;
                 }
-
-                $data = $this->reader->readUntil(">", Reader::INCL);             //open tag
-                $rawTokens[] = $data;
-                $data = $this->reader->readUntil("</{$tag}>", Reader::EXCL);     // content
-                $rawTokens[] = $data;
-                $data = $this->reader->readUntil("</{$tag}>", Reader::INCL);     //closing tag
-                $rawTokens[] = $data;
-                continue 2;
             }
 
-            $data = $this->reader->readUntil(">", Reader::INCL);
-            $rawTokens[] = $data;
+            if ($this->reader->doesMatch("<")) {
+                $rawTokens[] = $this->reader->readUntilIncluding(">");
+                continue;
+            }
+
+            $data = $this->reader->readUntilExcluding("<");
+            if ($this->trimText) {
+                $data = trim($data);
+            }
+            if ($data) {
+                $rawTokens[] = $data;
+            }
         }
         return $rawTokens;
     }
+
 
     private function parseTokens($rawTokens)
     {
@@ -86,37 +113,30 @@ class Parser
         for ($i = 0; $i < $count; $i++) {
             $t = $rawTokens[$i];
 
-            if (preg_match('/^<!--.*-->$/is', $t))                      //Comment
-            {
+            if (preg_match('/^<!--.*-->$/is', $t)) {
                 $tokens[] = Token::new_Comment($t);
-            } else {
-                if (preg_match('/^<!/', $t))                           //Doctype
-                {
-                    $tokens[] = Token::new_Text($t);
+            } elseif (preg_match('/^<!/', $t)) {
+                $tokens[] = Token::new_Text($t);
+            } elseif (preg_match('/^<.*>$/is', $t)) {
+                if ($t[1] == "/") {
+                    $type = TokenType::TAG_CLOSE;
                 } else {
-                    if (preg_match('/^<.*>$/is', $t))   //Tag
-                    {
-                        if ($t[1] == "/") {
-                            $type = TokenType::TAG_CLOSE;
-                        } else {
-                            if ($t[strlen($t) - 2] == "/") {
-                                $type = TokenType::TAG_SELF;
-                            } else {
-                                $type = TokenType::TAG_OPEN;
-                            }
-                        }
-
-                        preg_match('#</?(.*?)(?:\s(.*?))?/?>#is', $t, $match);
-                        $tag = $match[1];
-                        $rawAtt = isset($match[2]) ? $match[2] : "";
-                        $tokens[] = Token::new_Tag($type, $tag, $rawAtt);
-                    } else        //Text
-                    {
-                        $tokens[] = Token::new_Text($t);
+                    if ($t[strlen($t) - 2] == "/") {
+                        $type = TokenType::TAG_SELF;
+                    } else {
+                        $type = TokenType::TAG_OPEN;
                     }
                 }
+
+                preg_match('#</?(.*?)(?:\s(.*?))?/?>#is', $t, $match);
+                $tag = $match[1];
+                $rawAtt = isset($match[2]) ? $match[2] : "";
+                $tokens[] = Token::new_Tag($type, $tag, $rawAtt);
+            } else {
+                $tokens[] = Token::new_Text($t);
             }
         }
+
         return $tokens;
     }
 
@@ -147,14 +167,10 @@ class Parser
                     break;
 
                 case TokenType::TAG_CLOSE:
-                    $tag = $t['tag'];
-
                     $opening = $current;
-                    if ($opening->getTag() != $tag) {
-                        $opening = $current->parent($tag);
-                    }
-                    if (!$opening) {
-                        $opening = $root;
+
+                    if ($opening->getTag() != $t['tag']) {
+                        $opening = $current->parent($t['tag']) ?: $root;
                     }
 
                     $openChildren = $this->getOpenChildren($opening);

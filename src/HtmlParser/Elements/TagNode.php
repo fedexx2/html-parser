@@ -4,7 +4,7 @@ namespace HtmlParser\Elements;
 
 use HtmlParser\ClosingType;
 
-class TagNode extends CollectionNode
+class TagNode extends ChildrenNode
 {
     protected $tag;
 
@@ -21,31 +21,29 @@ class TagNode extends CollectionNode
         $this->tag = $tag;
         $this->closing = $closing;
 
-        if ($attributes) {
-
-            if (is_string($attributes)) {
-                $attRegex = "#(?:[^\s='\"\/]+)=\"(?:[^\"]*)\"|(?:[^\s='\"\/]+)='(?:[^']*)'|(?:[^\s='\"\/]+)=(?:[^'\"\/\s]*)|(?:[^\s='\"\/]+)#";
-                preg_match_all($attRegex, $attributes, $matches);
-                foreach ($matches[0] as $match) {
-                    $tmp = explode('=', $match, 2);
-                    $key = $tmp[0];
-                    $val = (isset($tmp[1])) ? $tmp[1] : null;
-                    $val = trim($val, "\"''");
-                    $this->attributes[$key] = $val;
-                }
-            } elseif (is_array($attributes)) {
-                $this->attributes = $attributes;
-            }
-
-            if (isset($this->attributes['id'])) {
-                $this->ids = array_flip(explode(' ', $this->attributes['id']));
-                unset($this->attributes['id']);
-            }
-            if (isset($this->attributes['class'])) {
-                $this->classes = array_flip(explode(' ', $this->attributes['class']));
-                unset($this->attributes['class']);
+        if(is_array($attributes)) {
+            $this->attributes = $attributes;
+        } elseif (is_string($attributes)) {
+            $attRegex = "#(?:[^\s='\"\/]+)=\"(?:[^\"]*)\"|(?:[^\s='\"\/]+)='(?:[^']*)'|(?:[^\s='\"\/]+)=(?:[^'\"\/\s]*)|(?:[^\s='\"\/]+)#";
+            preg_match_all($attRegex, $attributes, $matches);
+            foreach ($matches[0] as $match) {
+                $tmp = explode('=', $match, 2);
+                $key = $tmp[0];
+                $val = (isset($tmp[1])) ? $tmp[1] : null;
+                $val = trim($val, "\"''");
+                $this->attributes[$key] = $val;
             }
         }
+
+        if (isset($this->attributes['id'])) {
+            $this->ids = array_flip(explode(' ', $this->attributes['id']));
+            unset($this->attributes['id']);
+        }
+        if (isset($this->attributes['class'])) {
+            $this->classes = array_flip(explode(' ', $this->attributes['class']));
+            unset($this->attributes['class']);
+        }
+
         parent::__construct();
     }
 
@@ -70,6 +68,11 @@ class TagNode extends CollectionNode
     }
 
     /* ------------------------ ATTRIBUTES ------------------------- */
+
+    public function listAttributes()
+    {
+        return array_keys($this->attributes);
+    }
 
     public function getAttribute($key)
     {

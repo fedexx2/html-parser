@@ -8,9 +8,6 @@ class Reader
     private $length;
     private $position;
 
-    const INCL = true;
-    const EXCL = false;
-
     public function __construct($html)
     {
         $this->html = $html;
@@ -18,12 +15,25 @@ class Reader
         $this->position = 0;
     }
 
+    public function readUntilIncluding($key)
+    {
+        return $this->readUntil($key, true);
+    }
+
+    public function readUntilExcluding($key)
+    {
+        return $this->readUntil($key, false);
+    }
+
     public function readUntil($key, $including)
     {
         $end = strpos($this->html, $key, $this->position);
 
-        $end = ($end === false) ? $this->length :
-            (($including) ? $end + strlen($key) : $end);
+        if ($end === false) {
+            $end = $this->length;
+        } elseif ($including) {
+            $end += strlen($key);
+        }
 
         $ret = substr($this->html, $this->position, ($end - $this->position));
         $this->position = $end;
@@ -37,13 +47,7 @@ class Reader
             return false;
         }
 
-        for ($i = 0; $i < $l; $i++) {
-            if ($this->html[$this->position + $i] != $key[$i]) {
-                return false;
-            }
-        }
-
-        return true;
+        return (substr($this->html, $this->position, $l) == $key);
     }
 
     public function isEnd()

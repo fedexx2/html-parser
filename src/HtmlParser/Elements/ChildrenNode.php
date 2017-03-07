@@ -2,10 +2,9 @@
 
 namespace HtmlParser\Elements;
 
-use HtmlParser\NodeCollection;
 use HtmlParser\Selector;
 
-class CollectionNode extends AbstractNode implements \IteratorAggregate, \Countable
+class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countable
 {
     protected $nodes;
     protected $position;
@@ -81,7 +80,6 @@ class CollectionNode extends AbstractNode implements \IteratorAggregate, \Counta
         }
         return $ret;
     }
-
 
     public function removeChild(AbstractNode $node)
     {

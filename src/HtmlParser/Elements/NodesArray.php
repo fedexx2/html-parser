@@ -74,7 +74,7 @@ class NodesArray implements \IteratorAggregate, \Countable
                 $result->add($n);
             }
 
-            if ($depth != 0 && $n instanceof CollectionNode) {
+            if ($depth != 0 && $n instanceof ChildrenNode) {
                 $result->addRange($n->find($func, $depth));
             }
         }
