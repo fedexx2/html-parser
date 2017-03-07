@@ -55,7 +55,7 @@ class Selector
             $depth = ($i[0] == '>') ? 1 : -1;
             $i = trim($i, ' >');
 
-            preg_match_all('/[\.#@]?([^\.#@]+)/', $i, $pieces, PREG_SET_ORDER);
+            preg_match_all('/[\.#]?([^\.#]+)/', $i, $pieces, PREG_SET_ORDER);
 
             if (!$pieces) {
                 throw new \Exception('Error parsing selector code');
@@ -100,10 +100,10 @@ class Selector
         if ($this->tag == '*' && $node instanceof TagNode) {
             return true;
         }
-        if ($this->tag == '$' && $node instanceof TextNode) {
+        if ($this->tag == '@' && $node instanceof TextNode) {
             return true;
         }
-        if ($this->tag == '%' && $node instanceof CommentNode) {
+        if ($this->tag == '$' && $node instanceof CommentNode) {
             return true;
         }
         if (!$node instanceof TagNode) {
