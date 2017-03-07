@@ -35,13 +35,11 @@ class TagNode extends ChildrenNode
             }
         }
 
-        if (isset($this->attributes['id'])) {
-            $this->ids = array_flip(explode(' ', $this->attributes['id']));
-            unset($this->attributes['id']);
-        }
-        if (isset($this->attributes['class'])) {
-            $this->classes = array_flip(explode(' ', $this->attributes['class']));
-            unset($this->attributes['class']);
+        foreach(['id', 'class'] as $a) {
+            if (isset($this->attributes[$a])) {
+                $this->$a = array_flip(explode(' ', $this->attributes[$a]));
+                unset($this->attributes[$a]);
+            }
         }
 
         parent::__construct();
@@ -140,12 +138,11 @@ class TagNode extends ChildrenNode
     private function att2str()
     {
         $atts = [];
-        if (!empty($this->ids)) {
-            $atts[] = "id=\"" . implode(' ', array_keys($this->ids)) . "\"";
-        }
 
-        if (!empty($this->classes)) {
-            $atts[] = "class=\"" . implode(' ', array_keys($this->classes)) . "\"";
+        foreach(['id', 'class'] as $a) {
+            if (!empty($this->$a)) {
+                $atts[] = "{$a}=\"" . implode(' ', array_keys($this->$a)) . "\"";
+            }
         }
 
         foreach ($this->attributes as $key => $value) {
