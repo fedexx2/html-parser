@@ -74,9 +74,10 @@ class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countabl
 
     public function detachChildren()
     {
-        $ret = [];
-        foreach ($this->nodes as $n) {
-            $ret[] = $n->detach();
+        $ret = $this->nodes;
+        $this->nodes = [];
+        foreach ($ret as $n) {
+            $n->parent = null;
         }
         return $ret;
     }
@@ -114,7 +115,7 @@ class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countabl
     {
         if (($i = array_search($child, $this->nodes)) !== false) {
             $this->removeAt($i);
-            $this->insertAt($i, $new, 1);
+            $this->insertAt($i, $new);
         }
     }
 
