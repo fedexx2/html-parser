@@ -89,20 +89,7 @@ class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countabl
         }
     }
 
-    public function replaceChild(AbstractNode $child, $new)
-    {
-        $new = $this->toArray($new);
-
-        if (($i = array_search($child, $this->nodes)) !== false) {
-            $this->nodes[$i]->parent = null;
-            array_splice($this->nodes, $i, 1, $new);
-            foreach ($new as $n) {
-                $n->parent = $this;
-            }
-        }
-    }
-
-    private function insertAt($position, $new)
+    private function insertAt($position, $new, $delete = 0)
     {
         if ($new instanceof AbstractNode) {
             $new = [$new];
@@ -115,6 +102,14 @@ class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countabl
         array_splice($this->nodes, $position, 0, $new);
         foreach ($new as $n) {
             $n->parent = $this;
+        }
+    }
+
+    public function replaceChild(AbstractNode $child, $new)
+    {
+        if (($i = array_search($child, $this->nodes)) !== false) {
+            $this->nodes[$i]->parent = null;
+            $this->insertAt($i, $new, 1);
         }
     }
 
