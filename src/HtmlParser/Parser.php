@@ -94,9 +94,6 @@ class Parser
             }
 
             $data = $this->reader->readUntilExcluding("<");
-            if ($this->trimText) {
-                $data = trim($data);
-            }
             if ($data) {
                 $rawTokens[] = $data;
             }

@@ -12,7 +12,6 @@ class RootNode extends TagNode
 
     public function getHtml()
     {
-        //call parent->parent->getHtml()
         return ChildrenNode::getHtml();
     }
 }
