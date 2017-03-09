@@ -140,6 +140,7 @@ class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countabl
 
     public function getInfo(Array $info = [])
     {
+        $info = parent::getInfo($info);
         foreach ($this->nodes as $n) {
             $info = $n->getInfo($info);
         }

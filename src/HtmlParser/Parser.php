@@ -93,10 +93,7 @@ class Parser
                 continue;
             }
 
-            $data = $this->reader->readUntilExcluding("<");
-            if ($data) {
-                $rawTokens[] = $data;
-            }
+            $rawTokens[] = $this->reader->readUntilExcluding("<");
         }
         return $rawTokens;
     }
@@ -109,6 +106,10 @@ class Parser
 
         for ($i = 0; $i < $count; $i++) {
             $t = $rawTokens[$i];
+
+            if($t == '') {
+                continue;
+            }
 
             if (preg_match('/^<!--.*-->$/is', $t)) {
                 $tokens[] = Token::new_Comment($t);

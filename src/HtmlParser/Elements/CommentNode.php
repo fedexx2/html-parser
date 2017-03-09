@@ -32,9 +32,7 @@ class CommentNode extends AbstractNode
 
     public function getInfo(Array $info = [])
     {
-        if (!isset($info[self::class])) {
-            $info[self::class] = ['@count' => 0, '@length' => 0];
-        }
+        $info = parent::getInfo($info);
         $info[self::class]['@count']++;
         $info[self::class]['@length'] += strlen($this->comment);
         return $info;

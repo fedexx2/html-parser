@@ -14,4 +14,10 @@ class RootNode extends TagNode
     {
         return ChildrenNode::getHtml();
     }
+
+    public function getInfo(array $info = [])
+    {
+        return ChildrenNode::getInfo();
+    }
+
 }

@@ -83,11 +83,16 @@ abstract class AbstractNode
     }
 
 
-    abstract public function getInfo(Array $info = []);
-
     abstract public function getHtml();
 
     abstract public function getText();
 
-
+    protected function getInfo(array $info = [])
+    {
+        return (!empty($info)) ? $info : [
+            TagNode::class => ['@count' => 0],
+            TextNode::class => ['@count' => 0, '@length' => 0, '@trimmed' => 0],
+            CommentNode::class => ['@count' => 0, '@length' => 0]
+        ];
+    }
 }
