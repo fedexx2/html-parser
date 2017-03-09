@@ -58,6 +58,7 @@ class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countabl
 
     public function addChild(AbstractNode $node)
     {
+        $node->detach();
         $node->parent = $this;
         $this->nodes[] = $node;
         return $this;
@@ -66,6 +67,7 @@ class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countabl
     public function addChildren($nodes)
     {
         foreach ($nodes as $n) {
+            $n->detach();
             $n->parent = $this;
             $this->nodes[] = $n;
         }
@@ -98,10 +100,11 @@ class ChildrenNode extends AbstractNode implements \IteratorAggregate, \Countabl
             throw new \Exception("Invalid new nodes");
         }
 
-        array_splice($this->nodes, $position, 0, $new);
         foreach ($new as $n) {
+            $n->detach();
             $n->parent = $this;
         }
+        array_splice($this->nodes, $position, 0, $new);
     }
 
     public function removeChild(AbstractNode $child)

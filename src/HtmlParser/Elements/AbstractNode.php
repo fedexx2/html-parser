@@ -50,7 +50,9 @@ abstract class AbstractNode
 
     public function detach()
     {
-        $this->parent->removeChild($this);
+        if(! is_null($this->parent)) {
+            $this->parent->removeChild($this);
+        }
         return $this;
     }
 
