@@ -35,17 +35,17 @@ class NodesArray implements \IteratorAggregate, \Countable
 
     public function first()
     {
-        return $this->nodes[0];
+        return isset($this->nodes[0]) ? $this->nodes[0] : null;
     }
 
     public function nth($i)
     {
-        return $this->nodes[$i];
+        return isset($this->nodes[$i]) ? $this->nodes[$i] : null;
     }
 
     public function last()
     {
-        return $this->nodes[count($this->nodes) - 1];
+        return isset($this->nodes[count($this->nodes) - 1]) ? $this->nodes[count($this->nodes) - 1] : null;
     }
 
     public function add(AbstractNode $node)
