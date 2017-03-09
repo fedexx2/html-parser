@@ -9,4 +9,10 @@ class RootNode extends TagNode
         parent::__construct('');
         $this->parent = $this;
     }
+
+    public function getHtml()
+    {
+        //call parent->parent->getHtml()
+        return ChildrenNode::getHtml();
+    }
 }

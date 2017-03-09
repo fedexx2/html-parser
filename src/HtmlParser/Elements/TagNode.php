@@ -21,7 +21,7 @@ class TagNode extends ChildrenNode
         $this->tag = $tag;
         $this->closing = $closing;
 
-        if(is_array($attributes)) {
+        if (is_array($attributes)) {
             $this->attributes = $attributes;
         } elseif (is_string($attributes)) {
             $attRegex = "#(?:[^\s='\"\/]+)=\"(?:[^\"]*)\"|(?:[^\s='\"\/]+)='(?:[^']*)'|(?:[^\s='\"\/]+)=(?:[^'\"\/\s]*)|(?:[^\s='\"\/]+)#";
@@ -35,7 +35,7 @@ class TagNode extends ChildrenNode
             }
         }
 
-        foreach(['id', 'class'] as $a) {
+        foreach (['id', 'class'] as $a) {
             if (isset($this->attributes[$a])) {
                 $this->$a = array_flip(explode(' ', $this->attributes[$a]));
                 unset($this->attributes[$a]);
@@ -90,7 +90,7 @@ class TagNode extends ChildrenNode
         $this->attributes[$key] = $value;
     }
 
-    /* ------------------------- CLASSES - IDS -------------------------- */
+    /* ------------------------- CLASS - ID -------------------------- */
 
     public function hasClass($class)
     {
@@ -139,7 +139,7 @@ class TagNode extends ChildrenNode
     {
         $atts = [];
 
-        foreach(['id', 'class'] as $a) {
+        foreach (['id', 'class'] as $a) {
             if (!empty($this->$a)) {
                 $atts[] = "{$a}=\"" . implode(' ', array_keys($this->$a)) . "\"";
             }
@@ -158,10 +158,6 @@ class TagNode extends ChildrenNode
 
     public function getHtml()
     {
-        if ($this instanceof RootNode) {
-            return parent::getHtml();
-        }
-
         $atts = $this->att2str();
 
         switch ($this->closing) {
