@@ -126,7 +126,7 @@ class Parser
                     }
                 }
 
-                preg_match('#</?(.*?)(?:\s(.*?))?/?>#is', $t, $match);
+                preg_match('#<\/?([^\s>\/]+)\s?(.*)?\/?>#is', $t, $match);
                 $tag = $match[1];
                 $rawAtt = isset($match[2]) ? $match[2] : "";
                 $tokens[] = Token::new_Tag($type, $tag, $rawAtt);

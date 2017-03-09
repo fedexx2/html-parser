@@ -180,13 +180,17 @@ class TagNode extends ChildrenNode
 
     public function getInfo(Array $info = [])
     {
-        $info = parent::getInfo($info);
-        if (!isset($info[self::class][$this->tag])) {
-            $info[self::class][$this->tag] = 0;
-        }
-        $info[self::class][$this->tag]++;
-        $info[self::class]['@count']++;
+        if(!empty($info)) {
+            $info = parent::getInfo($info);
 
-        return $info;
+            if (!isset($info[self::class][$this->tag])) {
+                $info[self::class][$this->tag] = 0;
+            }
+            $info[self::class][$this->tag]++;
+            $info[self::class]['@count']++;
+            return $info;
+        } else {
+            return parent::getInfo($info);
+        }
     }
 }
